@@ -90,6 +90,7 @@ async def test_pool_size(test_engine):
         echo=True,
         pool_size=10,
         max_overflow=0,
+        pool_timeout=1,
     )
 
     conns = []
