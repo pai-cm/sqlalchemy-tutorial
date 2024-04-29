@@ -11,4 +11,14 @@ async def test_measure_elapsed_time_per_step(test_engine):
     async with test_engine.connect() as conn:
         """이게 커넥션 맺은 것음"""
         elapsed_time = time.perf_counter() - start_time
-        logging.info(f"f(1) 데이터베이스 연결에 걸린 시간: {elapsed_time:.4f}s")
+        logging.info(f"(1) 데이터베이스 연결에 걸린 시간: {elapsed_time:.4f}s")
+
+    start_time = time.perf_counter()
+    async with test_engine.connect() as conn:
+        """
+        test engine 이 커넥션 풀이다.
+        두번째 커넥션에 연결하는건 엄청 빠르다
+        첫번째 생성된 객체 그대로 사용 하는 것
+        """
+        elapsed_time = time.perf_counter() - start_time
+        logging.info(f"(2) 두번째 데이터베이스 연결에 걸린 시간: {elapsed_time:.4f}s")
