@@ -82,3 +82,22 @@ async def test_pool_recycle(test_engine):
         await conn.execute(sqlalchemy.text("select 1;"))
         elapsed_time = time.perf_counter() - start_time
         logging.info(f"(2) select query 날리는데 걸린 시간: {elapsed_time:.4f}s")
+
+
+async def test_pool_size(test_engine):
+    test_engine = create_async_engine(
+        'postgresql+asyncpg://user:password@localhost:5434/testdb',
+        echo=True,
+        pool_size=10,
+        max_overflow=0,
+    )
+
+    conns = []
+    for i in range(10):
+        logging.info(f"{i}th connection 생성하기 >> \n")
+        conns.append(await test_engine.connect())
+    logging.info(conns)
+
+    """반환을 안했기 때문에 터져야한다"""
+    logging.info(f"11th connection 생성하기 >> \n")
+    await test_engine.connect()
