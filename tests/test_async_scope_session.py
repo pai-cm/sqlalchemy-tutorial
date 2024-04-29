@@ -102,3 +102,36 @@ async def test_show_async_scoped_session2(test_engine):
 
     output0, output1 = await asyncio.gather(task0, task1)
     assert output0 == output1
+
+
+async def test_show_async_scoped_session3(test_engine):
+    test_engine = create_async_engine(
+        'postgresql+asyncpg://user:password@localhost:5434/testdb',
+        echo=True,
+        pool_size=2,
+        max_overflow=0,
+    )
+    session_factory = async_sessionmaker(test_engine)
+    ScopedSession = async_scoped_session(session_factory, scopefunc=asyncio.current_task)
+
+    async def call0_function():
+        logging.info(f"call0_function task id: {asyncio.current_task()}")
+        async with ScopedSession() as session:
+            logging.info(f"call0_function session: {session}")
+            result = await session.execute(text("SELECT pg_backend_pid()"))
+            logging.info(f"call0_function end")
+            return result.scalar()
+
+    async def call1_function():
+        logging.info(f"call1_function task id: {asyncio.current_task()}")
+        async with ScopedSession() as session:
+            logging.info(f"call1_function session: {session}")
+            result = await session.execute(text("SELECT pg_backend_pid()"))
+            logging.info(f"call1_function end")
+            return result.scalar()
+
+    task0 = asyncio.create_task(call0_function())
+    task1 = asyncio.create_task(call1_function())
+
+    output0, output1 = await asyncio.gather(task0, task1)
+    assert output0 != output1
