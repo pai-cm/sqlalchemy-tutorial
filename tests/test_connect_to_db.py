@@ -102,3 +102,17 @@ async def test_pool_size(test_engine):
     """반환을 안했기 때문에 터져야한다"""
     logging.info(f"11th connection 생성하기 >> \n")
     await test_engine.connect()
+
+
+async def test_set_statement_timeout(test_engine):
+    test_engine = create_async_engine(
+        'postgresql+asyncpg://user:password@localhost:5434/testdb',
+        echo=True,
+        connect_args={'server_settings': {'statement_timeout': '1000'}}  # 밀리세컨즈라 1000은 1초
+    )
+
+    async with test_engine.connect() as conn:
+        await conn.execute(sqlalchemy.text("SELECT pg_sleep(0.9)"))
+
+    async with test_engine.connect() as conn:
+        await conn.execute(sqlalchemy.text("SELECT pg_sleep(1.1)"))  # canceling statement due to statement
