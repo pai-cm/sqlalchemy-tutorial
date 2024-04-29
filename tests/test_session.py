@@ -36,12 +36,14 @@ async def test_add_journey(test_engine, with_tables):
         show_entity_status(given_user0)
 
         logging.info("\nflush >>>")
+        """flush 하면 auto increment id 값을 발번 받을 수 있다"""
         await session.flush([given_user0])
         show_entity_status(given_user0)
 
         logging.info("\ncommit >>>")
         await session.commit()
         show_entity_status(given_user0)
+        # given_user0.name expired 된 entity 를 조회 하려고 하니, 에러가 난다.
 
         logging.info("\nrefresh >>>")
         await session.refresh(given_user0)
